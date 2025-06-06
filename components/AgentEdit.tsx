@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import {
   Agent,
   AGENT_COLORS,
@@ -14,31 +14,49 @@ import c from 'classnames';
 import { useAgent, useUI } from '@/lib/state';
 
 export default function EditAgent() {
-  const agent = useAgent(state => state.current);
+  const currentAgent = useAgent(state => state.current);
   const updateAgent = useAgent(state => state.update);
   const nameInput = useRef(null);
   const { setShowAgentEdit } = useUI();
+
+  const [editableName, setEditableName] = useState(currentAgent.name);
+  const [editablePersonality, setEditablePersonality] = useState(currentAgent.personality);
+  const [editableBodyColor, setEditableBodyColor] = useState(currentAgent.bodyColor);
+  const [editableVoice, setEditableVoice] = useState(currentAgent.voice);
+
+  useEffect(() => {
+    setEditableName(currentAgent.name);
+    setEditablePersonality(currentAgent.personality);
+    setEditableBodyColor(currentAgent.bodyColor);
+    setEditableVoice(currentAgent.voice);
+  }, [currentAgent]);
 
   function onClose() {
     setShowAgentEdit(false);
   }
 
-  function updateCurrentAgent(adjustments: Partial<Agent>) {
-    updateAgent(agent.id, adjustments);
+  function handleSave() {
+    updateAgent(currentAgent.id, {
+      name: editableName,
+      personality: editablePersonality,
+      bodyColor: editableBodyColor,
+      voice: editableVoice,
+    });
+    onClose(); // Close the modal after saving
   }
 
   return (
-    <Modal onClose={() => onClose()}>
+    <Modal onClose={onClose}>
       <div className="editAgent">
         <div>
-          <form>
+          <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
             <div>
               <input
                 className="largeInput"
                 type="text"
                 placeholder="Name"
-                value={agent.name}
-                onChange={e => updateCurrentAgent({ name: e.target.value })}
+                value={editableName}
+                onChange={e => setEditableName(e.target.value)}
                 ref={nameInput}
               />
             </div>
@@ -47,10 +65,8 @@ export default function EditAgent() {
               <label>
                 Personality
                 <textarea
-                  value={agent.personality}
-                  onChange={e =>
-                    updateCurrentAgent({ personality: e.target.value })
-                  }
+                  value={editablePersonality}
+                  onChange={e => setEditablePersonality(e.target.value)}
                   rows={7}
                   placeholder="How should I act? Whatʼs my purpose? How would you describe my personality?"
                 />
@@ -65,11 +81,12 @@ export default function EditAgent() {
               {AGENT_COLORS.map((color, i) => (
                 <li
                   key={i}
-                  className={c({ active: color === agent.bodyColor })}
+                  className={c({ active: color === editableBodyColor })}
                 >
                   <button
+                    type="button"
                     style={{ backgroundColor: color }}
-                    onClick={() => updateCurrentAgent({ bodyColor: color })}
+                    onClick={() => setEditableBodyColor(color)}
                   />
                 </li>
               ))}
@@ -78,11 +95,9 @@ export default function EditAgent() {
           <div className="voicePicker">
             Voice
             <select
-              value={agent.voice}
+              value={editableVoice}
               onChange={e => {
-                updateCurrentAgent({
-                  voice: e.target.value as INTERLOCUTOR_VOICE,
-                });
+                setEditableVoice(e.target.value as INTERLOCUTOR_VOICE);
               }}
             >
               {INTERLOCUTOR_VOICES.map(voice => (
@@ -92,6 +107,10 @@ export default function EditAgent() {
               ))}
             </select>
           </div>
+        </div>
+        <div className="modal-actions">
+          <button type="button" className="button primary" onClick={handleSave}>Save</button>
+          <button type="button" className="button" onClick={onClose}>Cancel</button>
         </div>
       </div>
     </Modal>

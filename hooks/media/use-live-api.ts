@@ -102,11 +102,16 @@ export function useLiveApi({
       }
     };
 
+    const onContent = (data: any) => { // TODO: Add proper typing for LiveServerContent
+      console.log('Received content event:', data);
+    };
+
     // Bind event listeners
     client.on('open', onOpen);
     client.on('close', onClose);
     client.on('interrupted', stopAudioStreamer);
     client.on('audio', onAudio);
+    client.on('content', onContent);
 
     return () => {
       // Clean up event listeners
@@ -114,6 +119,7 @@ export function useLiveApi({
       client.off('close', onClose);
       client.off('interrupted', stopAudioStreamer);
       client.off('audio', onAudio);
+      client.off('content', onContent);
     };
   }, [client]);
 

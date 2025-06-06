@@ -18,10 +18,22 @@
  * limitations under the License.
  */
 
-import { createContext, FC, ReactNode, useContext, useEffect } from 'react';
+import { createContext, FC, ReactNode, useContext, useEffect, useState } from 'react';
 import { useLiveApi, UseLiveApiResults } from '../hooks/media/use-live-api';
 
-const LiveAPIContext = createContext<UseLiveApiResults | undefined>(undefined);
+export interface ConversationEntry {
+  speaker: 'user' | 'agent';
+  text: string;
+}
+
+export interface LiveAPIContextValue extends UseLiveApiResults {
+  conversationHistory: ConversationEntry[];
+  addConversationEntry: (entry: ConversationEntry) => void;
+  isListening: boolean;
+  setIsListening: (isListening: boolean) => void;
+}
+
+const LiveAPIContext = createContext<LiveAPIContextValue | undefined>(undefined);
 
 export type LiveAPIProviderProps = {
   children: ReactNode;
@@ -33,6 +45,42 @@ export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({
   children,
 }) => {
   const liveAPI = useLiveApi({ apiKey });
+  const [conversationHistory, setConversationHistory] = useState<ConversationEntry[]>([]);
+  const [isListening, setIsListening] = useState(false);
+
+  const addConversationEntry = (entry: ConversationEntry) => {
+    setConversationHistory(prevHistory => [...prevHistory, entry]);
+  };
+
+  useEffect(() => {
+    const { client } = liveAPI;
+    // Handler for processing 'content' events from the client
+    const handleContent = (data: any) => { // TODO: Add proper typing for LiveServerContent
+      // Process agent response
+      if (data.modelTurn && data.modelTurn.parts) {
+        data.modelTurn.parts.forEach((part: any) => { // TODO: Add proper typing for part
+          if (part.text) {
+            addConversationEntry({ speaker: 'agent', text: part.text });
+          }
+        });
+      }
+
+      // Process user transcript
+      if (data.userTurn && data.userTurn.parts) {
+        data.userTurn.parts.forEach((part: any) => { // TODO: Add proper typing for part
+          if (part.text) {
+            addConversationEntry({ speaker: 'user', text: part.text });
+          }
+        });
+      }
+    };
+
+    client.on('content', handleContent);
+
+    return () => {
+      client.off('content', handleContent);
+    };
+  }, [liveAPI, addConversationEntry]);
 
   useEffect(() => {
     // Request microphone permission when component mounts
@@ -46,14 +94,22 @@ export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({
       });
   }, []);
 
+  const contextValue: LiveAPIContextValue = {
+    ...liveAPI,
+    conversationHistory,
+    addConversationEntry,
+    isListening,
+    setIsListening,
+  };
+
   return (
-    <LiveAPIContext.Provider value={liveAPI}>
+    <LiveAPIContext.Provider value={contextValue}>
       {children}
     </LiveAPIContext.Provider>
   );
 };
 
-export const useLiveAPIContext = () => {
+export const useLiveAPIContext = (): LiveAPIContextValue => {
   const context = useContext(LiveAPIContext);
   if (!context) {
     throw new Error('useLiveAPIContext must be used wihin a LiveAPIProvider');

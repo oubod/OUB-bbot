@@ -7,6 +7,7 @@ type BasicFaceProps = {
   mouthScale: number;
   eyeScale: number;
   color?: string;
+  isListening?: boolean;
 };
 
 const eye = (
@@ -30,6 +31,7 @@ export function renderBasicFace(props: BasicFaceProps) {
     eyeScale: eyesOpenness,
     mouthScale: mouthOpenness,
     color,
+    isListening,
   } = props;
   const { width, height } = ctx.canvas;
 
@@ -38,9 +40,19 @@ export function renderBasicFace(props: BasicFaceProps) {
 
   // Draw the background circle
   ctx.fillStyle = color || 'white';
+  if (isListening) {
+    ctx.fillStyle = '#e6f7ff'; // A light blue tint for listening
+  }
   ctx.beginPath();
   ctx.arc(width / 2, height / 2, width / 2 - 20, 0, Math.PI * 2);
   ctx.fill();
+
+  // Optionally, add a border if listening
+  if (isListening) {
+    ctx.strokeStyle = '#91d5ff'; // A stronger blue for the border
+    ctx.lineWidth = 5;
+    ctx.stroke();
+  }
 
   const eyesCenter = [width / 2, height / 2.425];
   const eyesOffset = width / 15;

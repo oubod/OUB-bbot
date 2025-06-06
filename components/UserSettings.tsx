@@ -10,6 +10,7 @@ export default function UserSettings() {
   const { setShowUserConfig } = useUI();
 
   function updateClient() {
+    localStorage.setItem('hasCompletedUserSetup', 'true');
     setShowUserConfig(false);
   }
 
@@ -24,8 +25,9 @@ export default function UserSettings() {
         <form
           onSubmit={e => {
             e.preventDefault();
+            localStorage.setItem('hasCompletedUserSetup', 'true');
             setShowUserConfig(false);
-            updateClient();
+            updateClient(); // updateClient also sets localStorage, but it's fine for this case
           }}
         >
           <p>Adding this optional info makes the experience more fun:</p>

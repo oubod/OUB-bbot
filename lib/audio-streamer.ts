@@ -42,6 +42,7 @@ export class AudioStreamer {
   public onComplete = () => {};
 
   constructor(public context: AudioContext) {
+    console.log('[AudioStreamer] Initialized.');
     this.gainNode = this.context.createGain();
     this.source = this.context.createBufferSource();
     this.gainNode.connect(this.context.destination);
@@ -104,6 +105,7 @@ export class AudioStreamer {
   }
 
   addPCM16(chunk: Uint8Array) {
+    console.log('[AudioStreamer] Received PCM16 data, length:', chunk.length);
     // Reset the stream complete flag when a new chunk is added.
     this.isStreamComplete = false;
     // Process the chunk into a Float32Array
@@ -148,6 +150,7 @@ export class AudioStreamer {
       const audioData = this.audioQueue.shift()!;
       const audioBuffer = this.createAudioBuffer(audioData);
       const source = this.context.createBufferSource();
+      console.log('[AudioStreamer] Playing buffered audio chunk.');
 
       if (this.audioQueue.length === 0) {
         if (this.endOfQueueAudioSource) {
@@ -217,6 +220,7 @@ export class AudioStreamer {
   }
 
   stop() {
+    console.log('[AudioStreamer] Stopping audio stream playback.');
     this.isPlaying = false;
     this.isStreamComplete = true;
     this.audioQueue = [];
