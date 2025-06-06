@@ -24,12 +24,15 @@ type BasicFaceProps = {
   radius?: number;
   /** The color of the face. */
   color?: string;
+  /** Whether the microphone is actively listening. */
+  isListening?: boolean;
 };
 
 export default function BasicFace({
   canvasRef,
   radius = 250,
   color,
+  isListening,
 }: BasicFaceProps) {
   const timeoutRef = useRef<NodeJS.Timeout>(null);
 
@@ -76,8 +79,8 @@ export default function BasicFace({
   // Render the face on the canvas
   useEffect(() => {
     const ctx = canvasRef.current?.getContext('2d')!;
-    renderBasicFace({ ctx, mouthScale, eyeScale, color });
-  }, [canvasRef, volume, eyeScale, mouthScale, color, scale]);
+    renderBasicFace({ ctx, mouthScale, eyeScale, color, isListening });
+  }, [canvasRef, volume, eyeScale, mouthScale, color, scale, isListening]);
 
   return (
     <canvas

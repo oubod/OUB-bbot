@@ -36,7 +36,7 @@ function ControlTray({ children }: ControlTrayProps) {
   const connectButtonRef = useRef<HTMLButtonElement>(null);
 
   const { showAgentEdit, showUserConfig } = useUI();
-  const { client, connected, connect, disconnect } = useLiveAPIContext();
+  const { client, connected, connect, disconnect, setIsListening } = useLiveAPIContext();
 
   // Stop the current agent if the user is editing the agent or user config
   useEffect(() => {
@@ -62,20 +62,42 @@ function ControlTray({ children }: ControlTrayProps) {
     };
     if (connected && !muted && audioRecorder) {
       audioRecorder.on('data', onData).start();
+      setIsListening(true);
     } else {
       audioRecorder.stop();
+      setIsListening(false);
     }
     return () => {
       audioRecorder.off('data', onData);
+      audioRecorder.stop(); // Ensure recorder is stopped on cleanup
+      setIsListening(false);
     };
-  }, [connected, client, muted, audioRecorder]);
+  }, [connected, client, muted, audioRecorder, setIsListening]);
+
+  useEffect(() => {
+    if (!connected) {
+      setIsListening(false);
+    }
+  }, [connected, setIsListening]);
 
   return (
     <section className="control-tray">
       <nav className={cn('actions-nav', { disabled: !connected })}>
         <button
           className={cn('action-button mic-button')}
-          onClick={() => setMuted(!muted)}
+          onClick={() => {
+            const newMutedState = !muted;
+            setMuted(newMutedState);
+            if (newMutedState) {
+              setIsListening(false);
+            } else {
+              // If unmuting AND connected, set to true.
+              // The main audioRecorder useEffect will also handle this, but this is more immediate.
+              if (connected) {
+                setIsListening(true);
+              }
+            }
+          }}
         >
           {!muted ? (
             <span className="material-symbols-outlined filled">mic</span>

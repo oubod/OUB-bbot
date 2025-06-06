@@ -81,7 +81,7 @@ export const useUI = create<{
   showAgentEdit: boolean;
   setShowAgentEdit: (show: boolean) => void;
 }>(set => ({
-  showUserConfig: true,
+  showUserConfig: localStorage.getItem('hasCompletedUserSetup') !== 'true',
   setShowUserConfig: (show: boolean) => set({ showUserConfig: show }),
   showAgentEdit: false,
   setShowAgentEdit: (show: boolean) => set({ showAgentEdit: show }),

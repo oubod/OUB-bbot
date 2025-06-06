@@ -50,14 +50,24 @@ export class AudioRecorder extends EventEmitter {
   }
 
   async start() {
+    console.log('[AudioRecorder] Starting recording...');
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      console.error('[AudioRecorder] User media not available.');
       throw new Error('Could not request user media');
     }
 
     this.starting = new Promise(async (resolve, reject) => {
-      this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      this.audioContext = await audioContext({ sampleRate: this.sampleRate });
-      this.source = this.audioContext.createMediaStreamSource(this.stream);
+      try {
+        this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log('[AudioRecorder] Microphone permission granted.');
+        this.audioContext = await audioContext({ sampleRate: this.sampleRate });
+        this.source = this.audioContext.createMediaStreamSource(this.stream);
+      } catch (err) {
+        console.error('[AudioRecorder] Error getting user media or setting up audio context:', err);
+        this.starting = null; // Reset starting promise
+        reject(err);
+        return;
+      }
 
       const workletName = 'audio-recorder-worklet';
       const src = createWorketFromSrc(workletName, AudioRecordingWorklet);
@@ -73,6 +83,7 @@ export class AudioRecorder extends EventEmitter {
         const arrayBuffer = ev.data.data.int16arrayBuffer;
 
         if (arrayBuffer) {
+          console.log('[AudioRecorder] Emitting audio data chunk.');
           const arrayBufferString = arrayBufferToBase64(arrayBuffer);
           this.emit('data', arrayBufferString);
         }
@@ -97,6 +108,7 @@ export class AudioRecorder extends EventEmitter {
   }
 
   stop() {
+    console.log('[AudioRecorder] Stopping recording.');
     // It is plausible that stop would be called before start completes,
     // such as if the Websocket immediately hangs up
     const handleStop = () => {

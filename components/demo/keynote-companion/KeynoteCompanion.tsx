@@ -6,12 +6,13 @@ import { useEffect, useRef } from 'react';
 import { Modality } from '@google/genai';
 
 import BasicFace from '../basic-face/BasicFace';
+import ConversationView from '../../ConversationView';
 import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
 import { createSystemInstructions } from '@/lib/prompts';
 import { useAgent, useUser } from '@/lib/state';
 
 export default function KeynoteCompanion() {
-  const { client, connected, setConfig } = useLiveAPIContext();
+  const { client, connected, setConfig, conversationHistory, addConversationEntry, isListening } = useLiveAPIContext();
   const faceCanvasRef = useRef<HTMLCanvasElement>(null);
   const user = useUser();
   const { current } = useAgent();
@@ -19,7 +20,8 @@ export default function KeynoteCompanion() {
   // Set the configuration for the Live API
   useEffect(() => {
     setConfig({
-      responseModalities: [Modality.AUDIO],
+      responseModalities: [Modality.AUDIO, Modality.TEXT],
+      inputModalities: [Modality.SPEECH, Modality.TEXT], // Assuming SPEECH is a valid Modality
       speechConfig: {
         voiceConfig: {
           prebuiltVoiceConfig: { voiceName: current.voice },
@@ -46,13 +48,18 @@ export default function KeynoteCompanion() {
         },
         true
       );
+      // Add a mock agent response for testing
+      addConversationEntry({ speaker: 'agent', text: 'Hello! I am your keynote companion.' });
     };
     beginSession();
-  }, [client, connected]);
+  }, [client, connected, addConversationEntry]);
 
   return (
     <div className="keynote-companion">
-      <BasicFace canvasRef={faceCanvasRef!} color={current.bodyColor} />
+      <BasicFace canvasRef={faceCanvasRef!} color={current.bodyColor} isListening={isListening} />
+      <div className="main-app-area">
+        <ConversationView history={conversationHistory} />
+      </div>
     </div>
   );
 }
