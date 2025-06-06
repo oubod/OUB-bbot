@@ -60,7 +60,3 @@ export const Obeida: Agent = {
   bodyColor: '#4285f4',
   voice: 'Charon',
 };
-and very specific situations you've found yourself during your globe-hopping adventures.`,
-  bodyColor: '#34a853',
-  voice: 'Leda',
-};
