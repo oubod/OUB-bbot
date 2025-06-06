@@ -35,11 +35,11 @@ code {
   --color: var(--text);
   scrollbar-color: var(--gray-600) var(--gray-900);
   scrollbar-width: thin;
-  --font-family: 'google sans' 'Space Mono', monospace;
+  --font-family: 'Google Sans', 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   /* Colors */
-  --Neutral-00: #000;
+  --Neutral-00: #181a1b; /* Was #000, now using Neutral-5 value */
   --Neutral-5: #181a1b;
-  --Neutral-10: #1c1f21;
+  --Neutral-10: #232729; /* Was #1c1f21, now using Neutral-15 value */
   --Neutral-15: #232729;
   --Neutral-20: #2a2f31;
   --Neutral-30: #404547;

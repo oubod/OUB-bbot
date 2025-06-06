@@ -11,7 +11,7 @@ interface ConversationViewProps {
 
 const ConversationView: React.FC<ConversationViewProps> = ({ history }) => {
   return (
-    <div>
+    <div className="conversation-container">
       {history.map((message, index) => (
         <div key={index} className={`message ${message.speaker}`}>
           <p><strong>{message.speaker}:</strong> {message.text}</p>
