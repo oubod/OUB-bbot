@@ -18,7 +18,7 @@
  * limitations under the License.
  */
 
-import { createContext, FC, ReactNode, useContext } from 'react';
+import { createContext, FC, ReactNode, useContext, useEffect } from 'react';
 import { useLiveApi, UseLiveApiResults } from '../hooks/media/use-live-api';
 
 const LiveAPIContext = createContext<UseLiveApiResults | undefined>(undefined);
@@ -33,6 +33,18 @@ export const LiveAPIProvider: FC<LiveAPIProviderProps> = ({
   children,
 }) => {
   const liveAPI = useLiveApi({ apiKey });
+
+  useEffect(() => {
+    // Request microphone permission when component mounts
+    navigator.mediaDevices.getUserMedia({ audio: true })
+      .then(stream => {
+        console.log('Microphone permission granted');
+        stream.getTracks().forEach(track => track.stop()); // Stop the stream since we don't need it yet
+      })
+      .catch(err => {
+        console.error('Error accessing microphone:', err);
+      });
+  }, []);
 
   return (
     <LiveAPIContext.Provider value={liveAPI}>

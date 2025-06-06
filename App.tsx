@@ -27,7 +27,8 @@ import UserSettings from './components/UserSettings';
 import { LiveAPIProvider } from './contexts/LiveAPIContext';
 import { useUI } from './lib/state';
 
-const API_KEY = import.meta.env.VITE_GEMINI_API_KEY;
+declare const __VITE_GEMINI_API_KEY__: string;
+const API_KEY = __VITE_GEMINI_API_KEY__;
 if (!API_KEY) {
   throw new Error(
     'Missing required environment variable: VITE_GEMINI_API_KEY'

@@ -56,38 +56,47 @@ export function useLiveApi({
   // register audio for streaming server -> speakers
   useEffect(() => {
     if (!audioStreamerRef.current) {
+      console.log('Initializing audio context...');
       audioContext({ id: 'audio-out' }).then((audioCtx: AudioContext) => {
+        console.log('Audio context created:', audioCtx.state);
         audioStreamerRef.current = new AudioStreamer(audioCtx);
         audioStreamerRef.current
           .addWorklet<any>('vumeter-out', VolMeterWorket, (ev: any) => {
             setVolume(ev.data.volume);
+            console.log('Volume update:', ev.data.volume);
           })
           .then(() => {
-            // Successfully added worklet
+            console.log('Successfully added audio worklet');
           })
           .catch(err => {
             console.error('Error adding worklet:', err);
           });
+      }).catch(err => {
+        console.error('Error creating audio context:', err);
       });
     }
   }, [audioStreamerRef]);
 
   useEffect(() => {
     const onOpen = () => {
+      console.log('WebSocket connection opened');
       setConnected(true);
     };
 
     const onClose = () => {
+      console.log('WebSocket connection closed');
       setConnected(false);
     };
 
     const stopAudioStreamer = () => {
+      console.log('Stopping audio streamer');
       if (audioStreamerRef.current) {
         audioStreamerRef.current.stop();
       }
     };
 
     const onAudio = (data: ArrayBuffer) => {
+      console.log('Received audio data, length:', data.byteLength);
       if (audioStreamerRef.current) {
         audioStreamerRef.current.addPCM16(new Uint8Array(data));
       }
