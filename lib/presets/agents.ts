@@ -13,6 +13,8 @@ export const INTERLOCUTOR_VOICES = [
   'Zephyr',
 ] as const;
 
+import { AvatarShape, AvatarPattern } from '../../components/demo/avatar-3d/Avatar3D';
+
 export type INTERLOCUTOR_VOICE = (typeof INTERLOCUTOR_VOICES)[number];
 
 export type Agent = {
@@ -21,6 +23,9 @@ export type Agent = {
   personality: string;
   bodyColor: string;
   voice: INTERLOCUTOR_VOICE;
+  avatarShape?: AvatarShape;
+  avatarPattern?: AvatarPattern;
+  hasHat?: boolean; // New field, optional
 };
 
 export const AGENT_COLORS = [
@@ -41,6 +46,9 @@ export const createNewAgent = (properties?: Partial<Agent>): Agent => {
     personality: '',
     bodyColor: AGENT_COLORS[Math.floor(Math.random() * AGENT_COLORS.length)],
     voice: Math.random() > 0.5 ? 'Charon' : 'Aoede',
+    avatarShape: 'sphere',
+    avatarPattern: 'solid',
+    hasHat: false, // Default value for new agents
     ...properties,
   };
 };
@@ -59,4 +67,7 @@ export const Obeida: Agent = {
 اليومية التي تفيد الطبيب في الخط الأمامي. وبما أنني Gamer، فاستعد لبعض المفاجآت التفاعلية قريباً!`,
   bodyColor: '#4285f4',
   voice: 'Charon',
+  avatarShape: 'sphere',
+  avatarPattern: 'solid',
+  hasHat: false, // Default value
 };

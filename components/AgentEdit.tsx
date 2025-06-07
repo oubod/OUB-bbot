@@ -9,6 +9,7 @@ import {
   INTERLOCUTOR_VOICE,
   INTERLOCUTOR_VOICES,
 } from '@/lib/presets/agents';
+import { AvatarShape, AvatarPattern } from '@/components/demo/avatar-3d/Avatar3D';
 import Modal from './Modal';
 import c from 'classnames';
 import { useAgent, useUI } from '@/lib/state';
@@ -23,12 +24,18 @@ export default function EditAgent() {
   const [editablePersonality, setEditablePersonality] = useState(currentAgent.personality);
   const [editableBodyColor, setEditableBodyColor] = useState(currentAgent.bodyColor);
   const [editableVoice, setEditableVoice] = useState(currentAgent.voice);
+  const [editableAvatarShape, setEditableAvatarShape] = useState<AvatarShape>(currentAgent.avatarShape || 'sphere');
+  const [editableAvatarPattern, setEditableAvatarPattern] = useState<AvatarPattern>(currentAgent.avatarPattern || 'solid');
+  const [editableHasHat, setEditableHasHat] = useState<boolean>(currentAgent.hasHat || false);
 
   useEffect(() => {
     setEditableName(currentAgent.name);
     setEditablePersonality(currentAgent.personality);
     setEditableBodyColor(currentAgent.bodyColor);
     setEditableVoice(currentAgent.voice);
+    setEditableAvatarShape(currentAgent.avatarShape || 'sphere');
+    setEditableAvatarPattern(currentAgent.avatarPattern || 'solid');
+    setEditableHasHat(currentAgent.hasHat || false);
   }, [currentAgent]);
 
   function onClose() {
@@ -41,6 +48,9 @@ export default function EditAgent() {
       personality: editablePersonality,
       bodyColor: editableBodyColor,
       voice: editableVoice,
+      avatarShape: editableAvatarShape,
+      avatarPattern: editableAvatarPattern,
+      hasHat: editableHasHat,
     });
     onClose(); // Close the modal after saving
   }
@@ -106,6 +116,65 @@ export default function EditAgent() {
                 </option>
               ))}
             </select>
+          </div>
+          <div>
+            <label htmlFor="avatarShapeSelect">Avatar Shape</label>
+            <select
+              id="avatarShapeSelect"
+              value={editableAvatarShape}
+              onChange={e => {
+                setEditableAvatarShape(e.target.value as AvatarShape);
+              }}
+              style={{
+                padding: '10px',
+                border: '1px solid var(--Neutral-30, #404547)',
+                backgroundColor: 'var(--Neutral-10, #1c1f21)',
+                color: 'var(--text, white)',
+                borderRadius: '8px',
+                width: '100%', // Make select full width of its container
+              }}
+            >
+              <option value="sphere">Sphere</option>
+              <option value="cube">Cube</option>
+              <option value="torus">Torus</option>
+            </select>
+          </div>
+          <div>
+            <label htmlFor="avatarPatternSelect">Avatar Pattern</label>
+            <select
+              id="avatarPatternSelect"
+              value={editableAvatarPattern}
+              onChange={e => setEditableAvatarPattern(e.target.value as AvatarPattern)}
+              style={{
+                padding: '10px',
+                border: '1px solid var(--Neutral-30, #404547)',
+                backgroundColor: 'var(--Neutral-5, #181a1b)',
+                color: 'var(--Neutral-90, #e1e2e3)',
+                borderRadius: '8px',
+                marginTop: '5px',
+                width: '100%',
+              }}
+            >
+              <option value="solid">Solid</option>
+              <option value="stripes">Stripes</option>
+              <option value="polkaDots">Polka Dots</option>
+            </select>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginTop: '15px' }}>
+            <input
+              type="checkbox"
+              id="hasHatCheckbox"
+              checked={editableHasHat}
+              onChange={e => setEditableHasHat(e.target.checked)}
+              style={{
+                width: '18px',
+                height: '18px',
+                accentColor: `var(--Blue-500, #007bff)`,
+              }}
+            />
+            <label htmlFor="hasHatCheckbox" style={{ userSelect: 'none', cursor: 'pointer' }}>
+              Enable Hat
+            </label>
           </div>
         </div>
         <div className="modal-actions">

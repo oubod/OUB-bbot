@@ -2,21 +2,39 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState, useRef } from 'react'; // Added useRef back
 import { Modality } from '@google/genai';
 
-import BasicFace from '../basic-face/BasicFace';
+// import BasicFace from '../basic-face/BasicFace'; // Removed BasicFace
+import Avatar3D from '../avatar-3d/Avatar3D'; // Added Avatar3D
 import ConversationView from '../../ConversationView';
 import { useLiveAPIContext } from '../../../contexts/LiveAPIContext';
 import { createSystemInstructions } from '@/lib/prompts';
 import { useAgent, useUser } from '@/lib/state';
 
 export default function KeynoteCompanion() {
-  const { client, connected, setConfig, conversationHistory, addConversationEntry, isListening } = useLiveAPIContext();
-  const faceCanvasRef = useRef<HTMLCanvasElement>(null);
+  const { client, connected, setConfig, conversationHistory, addConversationEntry, isListening, volume } = useLiveAPIContext(); // Add volume
   const user = useUser();
   const { current } = useAgent();
   const [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const [isTalking, setIsTalking] = useState(false);
+  const talkingTimeoutRef = useRef<NodeJS.Timeout | null>(null); // For cooldown
+
+  // Define constants for talking detection
+  const AUDIO_OUTPUT_DETECTION_THRESHOLD = 0.01;
+  const TALKING_STATE_COOLDOWN_MS = 1000;
+
+  useEffect(() => {
+    if (volume > AUDIO_OUTPUT_DETECTION_THRESHOLD) {
+      setIsTalking(true);
+      if (talkingTimeoutRef.current) {
+        clearTimeout(talkingTimeoutRef.current);
+      }
+      talkingTimeoutRef.current = setTimeout(() => {
+        setIsTalking(false);
+      }, TALKING_STATE_COOLDOWN_MS);
+    }
+  }, [volume]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -90,11 +108,16 @@ export default function KeynoteCompanion() {
         maxWidth: screenWidth < mobileBreakpoint ? '70vw' : 'none', // Constrain width on mobile
         maxHeight: screenWidth < mobileBreakpoint ? '30vh' : 'none', // Constrain height on mobile
         padding: screenWidth < mobileBreakpoint ? '0.5rem' : '0', // Add some padding around face on mobile
+        // Ensure the container itself has a reasonable size for the 3D canvas
+        width: screenWidth < mobileBreakpoint ? '70vw' : '50%',
+        height: screenWidth < mobileBreakpoint ? '30vh' : '100%',
       }}>
-        <BasicFace
-          canvasRef={faceCanvasRef!}
-          color={current.bodyColor}
-          isListening={isListening}
+        <Avatar3D
+          bodyColor={current.bodyColor}
+          shape={current.avatarShape || 'sphere'}
+          pattern={current.avatarPattern || 'solid'}
+          hasHat={current.hasHat || false}
+          isTalking={isTalking} // Pass isTalking state
         />
       </div>
       <div style={{
