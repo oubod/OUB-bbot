@@ -91,5 +91,10 @@ export default function useFace() {
   const { volume } = useLiveAPIContext();
   const eyeScale = useBlink({ speed: 0.0125 });
 
-  return { eyeScale, mouthScale: volume / 2 };
+  let mouthScale = 0;
+  if (Number.isFinite(volume)) {
+    mouthScale = volume / 2;
+  }
+
+  return { eyeScale, mouthScale };
 }

@@ -52,8 +52,20 @@ const VolMeterWorket = `
           sum += samples[i] * samples[i]
         }
 
-        rms = Math.sqrt(sum / samples.length)
+        if (samples.length > 0) {
+          rms = Math.sqrt(sum / samples.length)
+        } else {
+          rms = 0
+        }
+
+        if (!Number.isFinite(rms)) {
+          rms = 0
+        }
+
         this.volume = Math.max(rms, this.volume * 0.7)
+        if (!Number.isFinite(this.volume)) {
+          this.volume = 0
+        }
 
         this.nextUpdateFrame -= samples.length
         if (this.nextUpdateFrame < 0) {
