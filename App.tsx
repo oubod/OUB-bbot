@@ -20,7 +20,6 @@
 
 import AgentEdit from './components/AgentEdit';
 import ControlTray from './components/console/control-tray/ControlTray';
-import ErrorScreen from './components/demo/ErrorSreen';
 import KeynoteCompanion from './components/demo/keynote-companion/KeynoteCompanion';
 import Header from './components/Header';
 import UserSettings from './components/UserSettings';
@@ -44,7 +43,6 @@ function App() {
   return (
     <div className="App">
       <LiveAPIProvider apiKey={API_KEY}>
-        <ErrorScreen />
         <Header />
 
         {showUserConfig && <UserSettings />}
