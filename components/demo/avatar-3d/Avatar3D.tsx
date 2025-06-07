@@ -191,3 +191,5 @@ const Avatar3D: React.FC<Avatar3DProps> = ({
 };
 
 export default Avatar3D;
+
+// Re-triggering build with a minor comment.
